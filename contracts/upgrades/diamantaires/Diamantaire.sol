@@ -10,7 +10,7 @@ import 'hardhat/console.sol';
 
 /** 
   @notice: general purpose diamantaires
-  @dev: THIS CONTRACT TO BE CONTINUED AFTER IMMUTABLE DYNAMIC ARRAYS FEATURE ADD - https://github.com/ethereum/solidity/issues/12587 
+  @dev: THIS CONTRACT IS TO BE CONTINUED AFTER IMMUTABLE DYNAMIC ARRAYS FEATURE ADD - https://github.com/ethereum/solidity/issues/12587 
   -- use the numbered diamantaires (Diamantaire1.sol, Diamantaire2.sol, etc) for specific selectors[] size. 
   Multiple facetCuts will also be supported once the immutable dynamic arrays feature is added to Solidity.
 */
