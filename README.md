@@ -2,7 +2,7 @@
 
 ### 👋 Reader: we'd love to have you involved. Please consider joining the [Habitat](0xhabitat.org).
 
-Inspired by Nick Mudge's [governance-token-diamond](https://github.com/mudgen/governance-token-diamond). See orginal README for [Governance Token Diamond](#governance-token-diamond) below.
+Inspired by Nick Mudge's [governance-token-diamond](https://github.com/mudgen/governance-token-diamond). See orginal README [below](#governance-token-diamond).
 
 #### Updated Features:
 1. Uses solidity ^0.8.0.
