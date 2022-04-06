@@ -53,8 +53,12 @@ contract Diamantaire4 {
     GovernanceStorage.Layout storage gs = GovernanceStorage.layout();
     GovernanceStorage.Proposal storage p = gs.proposals[_proposalId];
 
-    address initializer = p.initializer;
-    bytes memory data = abi.encodeWithSignature('init()');
+    address initializer;
+    bytes memory data;
+    if (p.initializer != address(0)) {
+      initializer = p.initializer;
+      data = abi.encodeWithSignature('init()');
+    }
 
     DiamondBaseStorage.layout().diamondCut(facetCuts, initializer, data); 
   }

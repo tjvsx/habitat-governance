@@ -41,8 +41,6 @@ contract Governance {
         GovernanceStorage.Proposal storage p = gs.proposals[proposalId];
         if (_initializer.isContract()) {
             p.initializer = _initializer;
-        } else {
-            p.initializer = address(0);
         }
         p.proposer = msg.sender;
         p.proposalContract = _proposalContract;

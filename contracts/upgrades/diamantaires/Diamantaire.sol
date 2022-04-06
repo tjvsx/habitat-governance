@@ -8,12 +8,12 @@ import { GovernanceStorage } from '../../storage/GovernanceStorage.sol';
 
 import 'hardhat/console.sol';
 
-/** 
-  @notice: general purpose diamantaires
-  @dev: THIS CONTRACT IS TO BE CONTINUED AFTER IMMUTABLE DYNAMIC ARRAYS FEATURE ADD - https://github.com/ethereum/solidity/issues/12587 
-  -- use the numbered diamantaires (Diamantaire1.sol, Diamantaire2.sol, etc) for specific selectors[] size. 
-  Multiple facetCuts will also be supported once the immutable dynamic arrays feature is added to Solidity.
-*/
+
+//   GENERAL PURPOSE DIAMANTAIRES
+//   @dev: THIS CONTRACT IS TO BE CONTINUED AFTER IMMUTABLE DYNAMIC ARRAYS FEATURE ADD - https://github.com/ethereum/solidity/issues/12587 
+//   -- use the numbered diamantaires (Diamantaire1.sol, Diamantaire2.sol, etc) for specific selectors[] size. 
+//   Multiple facetCuts will also be supported once the immutable dynamic arrays feature is added to Solidity.
+
 
 contract Diamantaire {
   using DiamondBaseStorage for DiamondBaseStorage.Layout;
@@ -44,14 +44,6 @@ contract Diamantaire {
   // to be delegatecalled
   function execute(uint _proposalId) external {
 
-    GovernanceStorage.Layout storage gs = GovernanceStorage.layout();
-    GovernanceStorage.Proposal storage p = gs.proposals[_proposalId];
-
-    address initializer;
-    if (p.initializer != address(0)) {
-      initializer = p.initializer;
-    }
-
     IDiamondCuttable.FacetCut[] memory facetCuts = new IDiamondCuttable.FacetCut[](1);
     facetCuts[0] = IDiamondCuttable.FacetCut({
         target: _target, 
@@ -71,7 +63,17 @@ contract Diamantaire {
     //   }
     // }
 
-    DiamondBaseStorage.layout().diamondCut(facetCuts, initializer, '0xe1c7392a');
+    GovernanceStorage.Layout storage gs = GovernanceStorage.layout();
+    GovernanceStorage.Proposal storage p = gs.proposals[_proposalId];
+
+    address initializer;
+    bytes memory data;
+    if (p.initializer != address(0)) {
+      initializer = p.initializer;
+      data = abi.encodeWithSignature('init()');
+    }
+
+    DiamondBaseStorage.layout().diamondCut(facetCuts, initializer, data);
     
   }
 
