@@ -29,7 +29,7 @@ contract Diamantaire1 {
   }
 
   // to be delegatecalled
-  function execute(uint _proposalId) external {
+  function execute(uint256 _proposalId) external {
 
     bytes4[] memory _selectors = new bytes4[](1);
     _selectors[0] = _selector0;

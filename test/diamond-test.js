@@ -169,9 +169,9 @@ describe('Diamond', function () {
         // governance proposal passed
         expect(await governancefacet.proposalStatus(0)).to.equal(5);
 
-        // // check if testfacet is callable via diamond and has initialized state
-        // const testfacet = await ethers.getContractAt('TestFacet', diamond.address)
-        // expect(await testfacet.getInitializedValue()).to.equal(true);
+        // check if testfacet is callable via diamond and has initialized state
+        const testfacet = await ethers.getContractAt('TestFacet', diamond.address)
+        expect(await testfacet.getInitializedValue()).to.equal(true);
         
       });
     });

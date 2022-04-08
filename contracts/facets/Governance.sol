@@ -22,7 +22,7 @@ contract Governance {
         return g.proposalCount;
     }
 
-    function propose(address _proposalContract, address _initializer, uint _deadline) external returns (uint proposalId) {
+    function propose(address _proposalContract, address _initializer, uint _deadline) external returns (uint256 proposalId) {
         require(_proposalContract.isContract(), 'Proposed contract has no code');
         ERC20BaseStorage.Layout storage ts = ERC20BaseStorage.layout();
         GovernanceStorage.Layout storage gs = GovernanceStorage.layout();
@@ -53,7 +53,7 @@ contract Governance {
         // emit Vote(proposalId, msg.sender, proposerBalance, true);
     }
 
-    function executeProposal(uint _proposalId) external {
+    function executeProposal(uint256 _proposalId) external {
         ERC20BaseStorage.Layout storage ets = ERC20BaseStorage.layout();
         GovernanceStorage.Layout storage gs = GovernanceStorage.layout();   
         GovernanceStorage.Proposal storage p = gs.proposals[_proposalId];
@@ -86,6 +86,7 @@ contract Governance {
                     ets.balances[proposer] += votes / proposerAwardDivisor;
 
                     // emit ProposalExecutionSuccessful(_proposalId, true);
+                    // and delete proposal?
                 }
                 else {
                     p.stuck = true;
@@ -102,6 +103,7 @@ contract Governance {
         else {
             ets.balances[proposer] -= votes;
             // emit ProposalExecutionSuccessful(_proposalId, false);
+            // and delete proposal?
         }                
     }
 
@@ -115,7 +117,7 @@ contract Governance {
         Rejected                        // 6
     }
 
-    function proposalStatus(uint _proposalId) public view returns (ProposalStatus status) {
+    function proposalStatus(uint256 _proposalId) public view returns (ProposalStatus status) {
         ERC20BaseStorage.Layout storage ets = ERC20BaseStorage.layout();
         GovernanceStorage.Layout storage gs = GovernanceStorage.layout();
         GovernanceStorage.Proposal storage p = gs.proposals[_proposalId];
@@ -160,7 +162,7 @@ contract Governance {
         ProposalStatus status;
     }
 
-    function proposal(uint _proposalId) external view returns (RetrievedProposal memory retrievedProposal) {
+    function proposal(uint256 _proposalId) external view returns (RetrievedProposal memory retrievedProposal) {
         GovernanceStorage.Layout storage gs = GovernanceStorage.layout();   
         GovernanceStorage.Proposal storage p = gs.proposals[_proposalId];
         retrievedProposal = RetrievedProposal({
@@ -173,7 +175,7 @@ contract Governance {
         });        
     }
 
-    function vote(uint _proposalId, bool _support) external {
+    function vote(uint256 _proposalId, bool _support) external {
         ERC20BaseStorage.Layout storage ets = ERC20BaseStorage.layout();
         GovernanceStorage.Layout storage gs = GovernanceStorage.layout();   
         require(_proposalId < gs.proposalCount, 'Governance: _proposalId does not exist');
@@ -201,7 +203,7 @@ contract Governance {
         ets.balances[msg.sender] += balance / voterAwardDivisor;
     }
 
-    function unvote(uint _proposalId) external {
+    function unvote(uint256 _proposalId) external {
         ERC20BaseStorage.Layout storage ets = ERC20BaseStorage.layout();
         GovernanceStorage.Layout storage gs = GovernanceStorage.layout();   
         require(_proposalId < gs.proposalCount, 'Governance: _proposalId does not exist');

@@ -9,7 +9,7 @@ Inspired by Nick Mudge's [governance-token-diamond](https://github.com/mudgen/go
 2. Uses [Solidstate contracts](https://github.com/solidstate-network/solidstate-solidity) for replaced Diamond(Gem.sol), ERC20Token(Token.sol), and storage syntax.
 > For context, when a proposal is passed in [Governance](./contracts/facets/Governance.sol) the executedProposal function can perform arbitrary functionality by calling the proposal's ***ProposalContract*** that contains the `execute(_proposalId)` function. 
 4. A [ProposalContract](./contracts/upgrades/proposals/TokenMinter.sol) can call back to the diamond's existing functions.
-5. The [Diamantaire contracts](./contracts/upgrades/diamantaires/Diamantaire.sol) are a set of ProposalContracts that can cut any deployed facet. Be sure to read the @dev notes to understand current limitations with this approach.
+5. The [Diamantaire contracts](./contracts/upgrades/diamantaires/Diamantaire.sol) are a set of ProposalContracts that can cut any deployed facet. Be sure to read this contract's comments to understand current limitations with this approach.
 6. Removed the `totalSupplyCap` state variable for now.
 
 ---

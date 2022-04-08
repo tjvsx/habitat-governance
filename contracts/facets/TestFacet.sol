@@ -11,10 +11,6 @@ contract TestFacet {
     return l.test;
   }
 
-  function testFunc1() external pure returns (bool) {
-    return true;
-  }
-
   function testFunc2() external pure returns (bool) {
     return true;
   }
@@ -44,6 +40,10 @@ contract TestFacet {
   }
 
   function testFunc9() external pure returns (bool) {
+    return true;
+  }
+
+  function testFunc10() external pure returns (bool) {
     return true;
   }
 

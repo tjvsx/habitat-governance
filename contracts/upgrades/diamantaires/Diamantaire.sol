@@ -42,7 +42,7 @@ contract Diamantaire {
   }
 
   // to be delegatecalled
-  function execute(uint _proposalId) external {
+  function execute(uint256 _proposalId) external {
 
     IDiamondCuttable.FacetCut[] memory facetCuts = new IDiamondCuttable.FacetCut[](1);
     facetCuts[0] = IDiamondCuttable.FacetCut({
