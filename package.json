@@ -18,6 +18,7 @@
     "ether-time-traveler": "^1.1.0",
     "form-data": "^4.0.0",
     "hardhat-ethers": "^1.0.1",
+    "hardhat-gas-reporter": "^1.0.8",
     "json-diff": "^0.7.1",
     "murmur-128": "^1.0.0",
     "request": "^2.88.2",

@@ -4,17 +4,19 @@ pragma solidity ^0.8.0;
 import { ERC20BaseInternal } from '@solidstate/contracts/token/ERC20/base/ERC20BaseInternal.sol';
 import { ERC20MetadataStorage } from '@solidstate/contracts/token/ERC20/metadata/ERC20MetadataStorage.sol';
 import { ERC20BaseStorage } from '@solidstate/contracts/token/ERC20/base/ERC20BaseStorage.sol';
-import { GovernanceStorage } from '../../storage/GovernanceStorage.sol'; 
+import { OwnableStorage } from '@solidstate/contracts/access/OwnableStorage.sol';
+import { GovernanceStorage } from '../../../storage/GovernanceStorage.sol'; 
 
 contract InitVoting is ERC20BaseInternal {  
     using ERC20MetadataStorage for ERC20MetadataStorage.Layout;
     using ERC20BaseStorage for ERC20BaseStorage.Layout;  
+    using GovernanceStorage for GovernanceStorage.Layout;
+    using OwnableStorage for OwnableStorage.Layout;
     function init() external {
-        // declaring storage
+        OwnableStorage.layout().setOwner(address(this));
+
         ERC20MetadataStorage.Layout storage t = 
         ERC20MetadataStorage.layout();
-        GovernanceStorage.Layout storage g = 
-        GovernanceStorage.layout();
 
         t.setName("Token");
         t.setSymbol("TKN");
@@ -22,6 +24,8 @@ contract InitVoting is ERC20BaseInternal {
 
         _mint(msg.sender, 1000);
 
+        GovernanceStorage.Layout storage g = 
+        GovernanceStorage.layout();
         // Require 5 percent of governance token for votes to pass a proposal
         g.quorumDivisor = 20;
         // Proposers must own 1 percent of totalSupply to submit a proposal
@@ -38,6 +42,4 @@ contract InitVoting is ERC20BaseInternal {
         // Proposals must have no more than 336 hours (14 days) of voting time
         g.maxDuration = 336;
     }
-
-
 }

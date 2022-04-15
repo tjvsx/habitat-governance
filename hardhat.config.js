@@ -1,6 +1,7 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-ganache");
+require("hardhat-gas-reporter");
 require('dotenv').config();
 
 //tasks
@@ -52,5 +53,9 @@ module.exports = {
   },
   mocha: {
     timeout: 8000000000
+  },
+  gasReporter: {
+    currency: 'USD',
+    gasPrice: 21
   }
 };

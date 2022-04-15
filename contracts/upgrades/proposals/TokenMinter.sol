@@ -10,7 +10,7 @@ contract TokenMinter is ERC20BaseInternal {
   function execute(uint _proposalId) external {
     // peform an operation on the storage of the contract that's calling it
     if (_proposalId >= 0) {
-      _mint(msg.sender, 500);
+      _mint(address(this), 500);
     }
   }
 }
