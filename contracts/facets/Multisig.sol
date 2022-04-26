@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.0;
 
-import { ECDSAMultisigWallet, ECDSAMultisigWalletStorage } from '@solidstate/contracts/multisig/ECDSAMultisigWallet.sol';
-import { CloneFactory } from '@solidstate/contracts/factory/CloneFactory.sol';
+import { ECDSAMultisigWallet, ECDSAMultisigWalletStorage } from "@solidstate/contracts/multisig/ECDSAMultisigWallet.sol";
+import { CloneFactory } from "@solidstate/contracts/factory/CloneFactory.sol";
 
 contract Multisig is ECDSAMultisigWallet {
     using ECDSAMultisigWalletStorage for ECDSAMultisigWalletStorage.Layout;

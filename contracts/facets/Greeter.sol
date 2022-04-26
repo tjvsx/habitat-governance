@@ -1,7 +1,7 @@
 
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
-import { GreeterStorage } from '../storage/GreeterStorage.sol';
+import { GreeterStorage } from "contracts/storage/GreeterStorage.sol";
 
 contract Greeter {
     using GreeterStorage for GreeterStorage.Layout;

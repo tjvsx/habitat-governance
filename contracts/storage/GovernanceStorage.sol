@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.12;
 
-// import {IDiamondCuttable} from '@solidstate/contracts/proxy/diamond/IDiamondCuttable.sol';
-
 library GovernanceStorage {
 
     struct Voted {        
@@ -17,7 +15,6 @@ library GovernanceStorage {
         mapping(address => Voted) voted;
 
         address proposalContract;
-        address initializer;
 
         address proposer;
         bool executed;
@@ -45,14 +42,14 @@ library GovernanceStorage {
         uint8 voteAwardCapDivisor;
         // max time (hours) a proposal can be voted on.
         uint16 maxDuration;
-        // uint16 minDuration;
+        uint16 minDuration;
         uint24 proposalCount;
         mapping(uint => Proposal) proposals;
         mapping(address => uint24[]) votedProposalIds;
     }
 
     bytes32 internal constant STORAGE_SLOT =
-        keccak256('habitat.governace.diamond.storage');
+        keccak256("habitat.governace.diamond.storage");
 
     function layout() internal pure returns (Layout storage l) {
         bytes32 slot = STORAGE_SLOT;

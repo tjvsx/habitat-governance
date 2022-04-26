@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
-import { TestStorage } from '../storage/TestStorage.sol';
+import { TestStorage } from "contracts/storage/TestStorage.sol";
+import { TesterStorage } from "contracts/storage/TesterStorage.sol";
 
 pragma solidity ^0.8.0;
 
 contract TestFacet1 {
   using TestStorage for TestStorage.Layout;
+  using TesterStorage for TesterStorage.Layout;
 
   function getInitializedValue() external view returns (bool) {
     TestStorage.Layout storage l = TestStorage.layout();

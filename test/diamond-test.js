@@ -5,9 +5,9 @@ const { ethers } = require('hardhat');
 //governance upgrade global vars
 async function governanceFacetCut() {
   //deploy offchain cut initializer contract
-  const InitVoting = await ethers.getContractFactory('InitVoting');
-  const initvoting = await InitVoting.deploy();
-  await initvoting.deployed();
+  const InitGovernance = await ethers.getContractFactory('GovernanceTokenInit');
+  const initgovernance = await InitGovernance.deploy();
+  await initgovernance.deployed();
 
   //deploy uninitialized token contract
   const TokenFactory = await ethers.getContractFactory('Token');
@@ -40,7 +40,7 @@ async function governanceFacetCut() {
 
   return {
     facetCuts,
-    initvoting
+    initgovernance
   }
   
 }
@@ -98,26 +98,32 @@ describe('Diamond', function () {
   let ownerfacet;
   let tokenfacet;
   let governancefacet;
+  let habitatrepo;
 
   describe('Scenarios', function () {
 
     before(async function () {
       [dao, user1, user2, user3] = await ethers.getSigners();
 
-      //predeploy diamondCut facet contract
-      const CutterFactory = await ethers.getContractFactory('Cutter');
-      const cutter = await CutterFactory.deploy();
-      await cutter.deployed();
-
       //predeploy loupe facet contract
-      const LouperFactory = await ethers.getContractFactory('Louper');
+      const LouperFactory = await ethers.getContractFactory('DiamondLoupeFacet');
       const louper = await LouperFactory.deploy();
       await louper.deployed();
 
       //predeploy ownership facet contract
-      const OwnerFactory = await ethers.getContractFactory('Owner');
+      const OwnerFactory = await ethers.getContractFactory('OwnershipFacet');
       const owner = await OwnerFactory.deploy();
       await owner.deployed();
+
+      //predeploy repo contract
+      const HabitatRepository = await ethers.getContractFactory('HabitatRepository');
+      habitatrepo = await HabitatRepository.deploy(dao.address, [owner.address, louper.address]);
+      await habitatrepo.deployed();
+
+      //predeploy diamondCut facet contract
+      const CutterFactory = await ethers.getContractFactory('DiamondCutFacet');
+      const cutter = await CutterFactory.deploy();
+      await cutter.deployed();
 
       const facetCuts = [
         {
@@ -145,13 +151,13 @@ describe('Diamond', function () {
       ];
 
       //deploy diamond contract
-      const DiamondFactory = await ethers.getContractFactory('Gem');
-      diamond = await DiamondFactory.connect(dao).deploy(facetCuts);
+      const DiamondFactory = await ethers.getContractFactory('Diamond');
+      diamond = await DiamondFactory.connect(dao).deploy(facetCuts, habitatrepo.address);
       await diamond.connect(dao).deployed()
 
-      cutterfacet = await ethers.getContractAt('Cutter', diamond.address)
-      louperfacet = await ethers.getContractAt('Louper', diamond.address)
-      ownerfacet = await ethers.getContractAt('Owner', diamond.address)
+      cutterfacet = await ethers.getContractAt('DiamondCutFacet', diamond.address)
+      louperfacet = await ethers.getContractAt('DiamondLoupeFacet', diamond.address)
+      ownerfacet = await ethers.getContractAt('OwnershipFacet', diamond.address)
     });
 
     describe('Single User', function() {
@@ -176,12 +182,12 @@ describe('Diamond', function () {
         }
 
         //deploy new diamond contract with cuts in constructor
-        const NewDiamondFactory = await ethers.getContractFactory('Gem');
-        const newDiamond = await NewDiamondFactory.connect(user1).deploy(facetCuts);
+        const NewDiamondFactory = await ethers.getContractFactory('Diamond');
+        const newDiamond = await NewDiamondFactory.connect(user1).deploy(facetCuts, habitatrepo.address);
         await newDiamond.deployed();
 
         // functions of diamond are accessible via newdiamond, but newdiamond holds its own state
-        const newDiamond_Owner = await ethers.getContractAt('Owner', newDiamond.address)
+        const newDiamond_Owner = await ethers.getContractAt('OwnershipFacet', newDiamond.address)
         expect(await newDiamond_Owner.owner()).to.equal(user1.address)
       });
 
@@ -192,17 +198,17 @@ describe('Diamond', function () {
         await proxy.deployed()
 
         // functions of diamond are accessible via proxy, but proxy holds its own state
-        const proxy_ownerfacet = await ethers.getContractAt('Owner', proxy.address)
+        const proxy_ownerfacet = await ethers.getContractAt('OwnershipFacet', proxy.address)
         expect(await proxy_ownerfacet.owner()).to.equal(user1.address)
       });
 
       // it('upgrades to governance ownership', async function() { /// for visual aid, diamond ownership state changes affect other tests
 
-      //   const { facetCuts, initvoting } = await governanceFacetCut();
+      //   const { facetCuts, initgovernance } = await governanceFacetCut();
       //   //do the cut
       //   await cutterfacet
       //     .connect(dao)
-      //     .diamondCut(facetCuts, initvoting.address, '0xe1c7392a'); //0xe1c7392a = 'init()'
+      //     .diamondCut(facetCuts, initgovernance.address, '0xe1c7392a'); //0xe1c7392a = 'init()'
   
       //   tokenfacet = await ethers.getContractAt('Token', diamond.address)
       //   governancefacet = await ethers.getContractAt('Governance', diamond.address)
@@ -248,12 +254,12 @@ describe('Diamond', function () {
       it('can upgrade to governance', async function() {
 
         //declare cuts
-        const { facetCuts, initvoting } = await governanceFacetCut();
+        const { facetCuts, initgovernance } = await governanceFacetCut();
 
         // fill transaction data
         target = diamond.address;
         ({ data } = 
-          await cutterfacet.populateTransaction.diamondCut(facetCuts, initvoting.address, '0xe1c7392a')
+          await cutterfacet.populateTransaction.diamondCut(facetCuts, initgovernance.address, '0xe1c7392a')
         );
         value = ethers.constants.Zero;
         delegate = false;
@@ -293,13 +299,13 @@ describe('Diamond', function () {
 
     describe('Governance', function() {
       
-      let upgradeProposalRegistry;
+      let upgradeRegistry;
 
       before(async function(){
-        //predeploy UpgradeProposalRegistry.sol
-        const UpgradeProposalRegistryFactory = await ethers.getContractFactory('UpgradeProposalRegistry')
-        upgradeProposalRegistry = await UpgradeProposalRegistryFactory.deploy();
-        await upgradeProposalRegistry.deployed()
+        //predeploy UpgradeRegistry
+        const UpgradeRegistryFactory = await ethers.getContractFactory('UpgradeRegistry')
+        upgradeRegistry = await UpgradeRegistryFactory.deploy();
+        await upgradeRegistry.deployed()
 
         // set dummy greeter upgrade in parent contract - for security
         const GreeterFactory = await ethers.getContractFactory('Greeter')
@@ -314,13 +320,13 @@ describe('Diamond', function () {
             ),
           },
         ];
-        await upgradeProposalRegistry.setUpgrade(facetCuts);
+        await upgradeRegistry.set(diamond.address, facetCuts, ethers.constants.AddressZero, '0x');
       });
 
       describe('DiamondCuts', function() {
         let testfacet1;
         let testfacet2;
-        let inittest;
+        let testinit;
         let proposalContract;
 
         before(async function() {
@@ -336,9 +342,9 @@ describe('Diamond', function () {
           await testfacet2.deployed()
 
           //proposer deploys diamondcut initializer - inits state vars of facet
-          const InitTest = await ethers.getContractFactory('InitTest')
-          inittest = await InitTest.deploy()
-          await inittest.deployed()
+          const TestInit = await ethers.getContractFactory('TestInit')
+          testinit = await TestInit.deploy()
+          await testinit.deployed()
         })
 
         it('registers facets for governance-use', async function() {
@@ -358,23 +364,22 @@ describe('Diamond', function () {
               ),
             },
           ];
-          const tx = await upgradeProposalRegistry.register(facetCuts);
+          const tx = await upgradeRegistry.register(diamond.address, facetCuts, testinit.address, '0xe1c7392a');
           const initiateProposal = await tx.wait(); // 0ms, as tx is already confirmed
-          const event = initiateProposal.events.find(event => event.event === 'UpgradeProposalRegistered');
-          const [minimalProxyEmission, facetCutsEmission] = event.args; // proposal address, facetCuts to execute
+          const event = initiateProposal.events.find(event => event.event === 'UpgradeRegistered');
+          const [diamondAddr, minimalProxyAddr, facetCutArray, initializerAddr, initializerFunc] = event.args;
           
-          const registeredUpgrade = await ethers.getContractAt('UpgradeProposalRegistry', minimalProxyEmission)
+          const registeredUpgrade = await ethers.getContractAt('UpgradeRegistry', minimalProxyAddr)
           proposalContract = registeredUpgrade.address;
         });
 
-        it('cuts diamond via minimalproxy proposals', async function() {
+        it('cuts diamond via minimal-proxy proposals', async function() {
           const currentBlock = await ethers.provider.getBlockNumber();
           const timestamp = (await ethers.provider.getBlock(currentBlock)).timestamp;
   
           const deadline = timestamp + 10;
-          const initializer = inittest.address;
   
-          await governancefacet.connect(user1).propose(proposalContract, initializer, deadline);
+          await governancefacet.connect(user1).propose(proposalContract, deadline);
   
           await governancefacet.connect(user2).vote(0, true)
   
@@ -400,9 +405,8 @@ describe('Diamond', function () {
           const currentBlock = await ethers.provider.getBlockNumber();
           const timestamp = (await ethers.provider.getBlock(currentBlock)).timestamp;
           const deadline = timestamp + 10;
-          const initializer = ethers.constants.AddressZero; //empty arg
 
-          await governancefacet.connect(user1).propose(proposalContract, initializer, deadline);
+          await governancefacet.connect(user1).propose(proposalContract, deadline);
 
           await governancefacet.connect(user2).vote(1, true)
 

@@ -1,20 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { TestStorage } from '../../../storage/TestStorage.sol';
+import { TestStorage } from "contracts/storage/TestStorage.sol";
 
-import 'hardhat/console.sol';
+import "hardhat/console.sol";
 
-contract InitTest {  
+contract TestInit {  
     using TestStorage for TestStorage.Layout;
 
     function init() external {
         TestStorage.Layout storage l = TestStorage.layout();
 
         l.test = true;
-
     }
 }
 
-
-// come up with way to register arbitrary data
+// TODO: come up with automated way to provide an 'init' template for end-users

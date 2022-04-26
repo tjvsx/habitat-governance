@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { ERC20BaseInternal } from '@solidstate/contracts/token/ERC20/base/ERC20BaseInternal.sol';
-import { ERC20MetadataStorage } from '@solidstate/contracts/token/ERC20/metadata/ERC20MetadataStorage.sol';
-import { ERC20BaseStorage } from '@solidstate/contracts/token/ERC20/base/ERC20BaseStorage.sol';
-import { OwnableStorage } from '@solidstate/contracts/access/OwnableStorage.sol';
-import { GovernanceStorage } from '../../../storage/GovernanceStorage.sol'; 
+import { ERC20BaseInternal } from "@solidstate/contracts/token/ERC20/base/ERC20BaseInternal.sol";
+import { ERC20MetadataStorage } from "@solidstate/contracts/token/ERC20/metadata/ERC20MetadataStorage.sol";
+import { ERC20BaseStorage } from "@solidstate/contracts/token/ERC20/base/ERC20BaseStorage.sol";
+import { OwnableStorage } from "@solidstate/contracts/access/OwnableStorage.sol";
+import { GovernanceStorage } from "contracts/storage/GovernanceStorage.sol"; 
 
-contract InitVoting is ERC20BaseInternal {  
+contract GovernanceTokenInit is ERC20BaseInternal {  
     using ERC20MetadataStorage for ERC20MetadataStorage.Layout;
     using ERC20BaseStorage for ERC20BaseStorage.Layout;  
     using GovernanceStorage for GovernanceStorage.Layout;
@@ -38,7 +38,7 @@ contract InitVoting is ERC20BaseInternal {
         // This is to help prevent too much inflation
         g.voteAwardCapDivisor = 20;
         // Proposals must have at least 48 hours of voting time
-        // g.minDuration = 48;
+        g.minDuration = 0; //48; 
         // Proposals must have no more than 336 hours (14 days) of voting time
         g.maxDuration = 336;
     }

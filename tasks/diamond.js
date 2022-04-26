@@ -499,15 +499,3 @@ task("diamond:cut", "Compare the local diamond.json with the remote diamond")
   });
 
 module.exports = {};
-
-
-
-/** 
- * TODOS:
- * verify DiamondInit contract - not verifying
- * include 'diamond' (w/ address and other info) in diamond.json
- */
-
-
-
-
