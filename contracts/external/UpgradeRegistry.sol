@@ -7,25 +7,28 @@ import { DiamondBaseStorage } from "@solidstate/contracts/proxy/diamond/DiamondB
 import { MinimalProxyFactory } from "@solidstate/contracts/factory/MinimalProxyFactory.sol";
 import { GovernanceStorage } from "contracts/storage/GovernanceStorage.sol";
 import { IUpgradeRegistry } from "contracts/interfaces/IUpgradeRegistry.sol";
-import { RepoStorage } from "contracts/storage/RepoStorage.sol";
+
+import { RepositoryStorage } from "contracts/storage/RepositoryStorage.sol";
+import { SafeOwnable, OwnableStorage } from "@solidstate/contracts/access/SafeOwnable.sol";
 
 import 'hardhat/console.sol';
 
-contract UpgradeRegistry is MinimalProxyFactory {
-
+contract UpgradeRegistry is MinimalProxyFactory, SafeOwnable {
+  
   using DiamondBaseStorage for DiamondBaseStorage.Layout;
   using GovernanceStorage for GovernanceStorage.Layout;
+  using OwnableStorage for OwnableStorage.Layout;
+  using RepositoryStorage for RepositoryStorage.Layout;
 
   event UpgradeRegistered (
-    address diamond,
+    address owner,
     address upgrade, 
-    IDiamondCuttable.FacetCut[] _facetCuts, 
-    address _target, 
-    bytes _data
+    IDiamondCuttable.FacetCut[] facetCuts, 
+    address target, 
+    bytes data
   );
 
   bool private registered;
-  address public owner;
 
   struct Cut {
     address target;
@@ -38,16 +41,13 @@ contract UpgradeRegistry is MinimalProxyFactory {
   bytes public data;
 
   function register(
-    address _owner,
     IDiamondCuttable.FacetCut[] memory _facetCuts, 
     address _target, 
     bytes calldata _data) 
   external returns (address) {
-    //require(address(this).isContract(), "UpgradeRegistry: Registrant(s) should be multisig");
     address _upgrade = _deployMinimalProxy(address(this));
-    IUpgradeRegistry(_upgrade).set(_owner,_facetCuts, _target, _data);
-
-    emit UpgradeRegistered(_owner, _upgrade, _facetCuts, _target, _data);
+    IUpgradeRegistry(_upgrade).set(msg.sender, _facetCuts, _target, _data);
+    emit UpgradeRegistered(msg.sender, _upgrade, _facetCuts, _target, _data);
     return _upgrade;
   }
 
@@ -59,7 +59,9 @@ contract UpgradeRegistry is MinimalProxyFactory {
   external {
     require(!registered, 
     "UpgradeProposalRegistry: Upgrade already registered, you cannot change its state");
-    owner = _owner;
+    // set owner (owner must accept ownership by calling this upgrade addr with "acceptOwnership()")
+    OwnableStorage.layout().setOwner(_owner);
+    //store cut
     IDiamondCuttable.FacetCut memory facetCut;
     for (uint256 i; i < _facetCuts.length; i++) { 
       facetCut = _facetCuts[i];
@@ -71,7 +73,7 @@ contract UpgradeRegistry is MinimalProxyFactory {
   }
 
   function get() 
-  external view returns (address, IDiamondCuttable.FacetCut[] memory, address, bytes memory) {
+  external view returns (IDiamondCuttable.FacetCut[] memory, address, bytes memory) {
     uint length = cuts.length;
     IDiamondCuttable.FacetCut[] memory facetCuts = new IDiamondCuttable.FacetCut[](length);
     for (uint i; i < facetCuts.length; i++) {
@@ -81,25 +83,18 @@ contract UpgradeRegistry is MinimalProxyFactory {
           selectors: cuts[i].selectors
       });
     }
-    return(owner, facetCuts, target, data);
+    return(facetCuts, target, data);
   }
 
   function execute(uint256 _proposalId) external {
-    GovernanceStorage.Layout storage l = GovernanceStorage.layout();
-    GovernanceStorage.Proposal storage p = l.proposals[_proposalId];
+    GovernanceStorage.Proposal storage p = GovernanceStorage.layout().proposals[_proposalId];
 
     address upgrade = p.proposalContract;
+    require(RepositoryStorage._hasUpgrade(upgrade), "Repo must contain upgrade");
 
-    (address __owner, IDiamondCuttable.FacetCut[] memory facetCuts, address __target, bytes memory __data) = 
+    (IDiamondCuttable.FacetCut[] memory facetCuts, address __target, bytes memory __data) = 
     IUpgradeRegistry(upgrade).get();
 
-    //require(address(this) owns NFT)
     DiamondBaseStorage.layout().diamondCut(facetCuts, __target, __data);
-
-    RepoStorage._setUpgrade(upgrade, __owner);
   }
 }
-
-
-
-

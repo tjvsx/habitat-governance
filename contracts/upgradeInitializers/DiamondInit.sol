@@ -13,7 +13,7 @@ import { IDiamondLoupe } from "@solidstate/contracts/proxy/diamond/IDiamondLoupe
 import { IDiamondCuttable } from "@solidstate/contracts/proxy/diamond/IDiamondCuttable.sol";
 import { IERC173 } from "@solidstate/contracts/access/IERC173.sol";
 import { IERC165 } from "@solidstate/contracts/introspection/IERC165.sol";
-import { RepoStorage } from "contracts/storage/RepoStorage.sol";
+import { RepositoryStorage } from "contracts/storage/RepositoryStorage.sol";
 
 // It is expected that this contract is customized if you want to deploy your diamond
 // with data from a deployment script. Use the init function to initialize state variables
@@ -23,7 +23,7 @@ address constant habitatRepo = address(0); // replace with Habitat RepoAddr
 
 contract DiamondInit {    
     using ERC165Storage for ERC165Storage.Layout;
-    using RepoStorage for RepoStorage.Layout;
+    using RepositoryStorage for RepositoryStorage.Layout;
 
     // You can add parameters to this function in order to pass in 
     // data to set your own state variables
@@ -35,8 +35,8 @@ contract DiamondInit {
         l.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
         l.supportedInterfaces[type(IERC173).interfaceId] = true;
 
-        RepoStorage.Layout storage r = RepoStorage.layout();
-        r.repo = habitatRepo;
+        // RepoStorage.Layout storage r = RepoStorage.layout();
+        // r.repo = habitatRepo;
 
         // add your own state variables 
         // EIP-2535 specifies that the `diamondCut` function takes two optional 

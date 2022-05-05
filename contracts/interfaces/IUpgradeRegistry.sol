@@ -11,7 +11,7 @@ interface IUpgradeRegistry is IDiamondCuttable {
 
     function set(address, FacetCut[] memory, address, bytes calldata) external;
 
-    function get() external view returns (address, IDiamondCuttable.FacetCut[] memory, address, bytes calldata);
+    function get() external view returns (IDiamondCuttable.FacetCut[] memory, address, bytes calldata);
 
     function execute(uint256) external;
 }

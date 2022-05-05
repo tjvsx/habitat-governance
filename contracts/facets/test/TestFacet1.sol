@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-import { TestStorage } from "contracts/storage/TestStorage.sol";
-import { TesterStorage } from "contracts/storage/TesterStorage.sol";
+import { TestStorage } from "contracts/storage/test/TestStorage.sol";
+import { TesterStorage } from "contracts/storage/test/TesterStorage.sol";
 
 pragma solidity ^0.8.0;
 

@@ -9,21 +9,14 @@ import { IDiamondLoupe } from "@solidstate/contracts/proxy/diamond/IDiamondLoupe
 import "hardhat/console.sol";
 
 contract DiamondProxy is Proxy {
-    address private _impl;
+    address private diamond;
 
-    constructor(address implementation) {
-        _impl = implementation;
+    constructor(address _diamond) {
+        diamond = _diamond;
         OwnableStorage.layout().owner = msg.sender;
     }
 
     function _getImplementation() internal view override returns (address) {
-        return IDiamondLoupe(_impl).facetAddress(msg.sig);
+        return IDiamondLoupe(diamond).facetAddress(msg.sig);
     }
 }
-
-// contract system exists as unimplemented until it's initialized, at which point the diamond's ownership is transfered to itself and the token and governance state is set.
-// in order to actually use governance, diamond must be owned by itself. in governance.executeProposal():
-// require- IERC173(owner).owner() = address(this)   .....?
-
-
-/// this contract may need a makeover - should be able to split away from habitat diamond at any time
