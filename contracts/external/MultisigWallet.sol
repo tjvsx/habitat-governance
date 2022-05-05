@@ -54,7 +54,6 @@ contract MultisigWallet is IMultisigWallet {
         RepositoryStorage.layout().availableUpgrades[team] += 1;
     }
 
-
     function _isInvalidNonce(
         address account,
         uint256 nonce
