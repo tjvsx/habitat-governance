@@ -52,7 +52,6 @@ contract MultisigWallet is IMultisigWallet {
         require(address(this) == MultisigWallet(payable(team)).diamond(), 
         "Multisig: sender should be Diamond");
         RepositoryStorage.layout().availableUpgrades[team] += 1;
-        //and send funds for gas
     }
 
 
